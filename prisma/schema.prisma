@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+generator zod {
+  provider = "zod-prisma-types"
+  output   = "./src/generated/zod"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  SELLER
+  DELIVERY_PARTNER
+}
+
+enum VerificationStatus{
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum Document_Type{
+  PAN_CARD
+  GST_CERTIFICATE
+  BANK_ACCOUNT
+  DRIVING_LICENSE
+  VEHICLE_RC
+}
+
+model User {
+  id                 String          @id @default(uuid())
+  name               String
+  email              String          @unique
+  phone              String          @unique
+  password           String
+  role               Role          @default(CUSTOMER)
+  isActive           Boolean    @default(false)
+  verificationStatus   VerificationStatus      @default(PENDING)
+  sellerProfile      SellerProfile?
+  documents          Documents[]
+  refreshTokens      RefreshTokens[]
+  auditLogs          AuditLogs[]
+
+  @@index([id])
+  @@index([role, verificationStatus])
+}
+
+model SellerProfile {
+  id                 String   @id @default(uuid())
+  userId             String  @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buisnessName       String
+  gstNumber          String
+  panNumber          String
+  bankAccountNo      String
+  categoryofBuisness String
+  rejectionReason    String?
+  createdAt          DateTime @default(now())
+}
+
+model Documents {
+  id         String   @id @default(uuid())
+  userId     String
+  type       Document_Type
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileURL    String
+  verified   Boolean
+  uploadedAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLogs {
+  id           String   @id @default(uuid())
+  action       String
+  performedBy  String
+  performedby  User     @relation(fields: [performedBy], references: [id], onDelete: Cascade)
+  targetUserId String
+  metaData     Json?
+  createdAt    DateTime @default(now())
+}
+
+model RefreshTokens {
+  id     String  @id @default(uuid())
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+  token  String
+  expiresAt DateTime 
+  revoked   Boolean   @default(false)
+  createdAt    DateTime @default(now())
+  
+}
