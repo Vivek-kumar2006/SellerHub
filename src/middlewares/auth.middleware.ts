@@ -22,7 +22,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
         const token = req.cookies?.authToken || req.headers.authorization?.split(' ')[1]
 
         if (!token) {
-            return res.status(401).json({ message: 'Authentication token required' });
+            return res.status(401).json({ message: 'User is not authenticated.' });
         }
 
         const payload = verifyAccessToken(token)

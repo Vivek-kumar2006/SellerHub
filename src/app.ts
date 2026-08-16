@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.routes.js";
-import { errorHandler } from "./utils/ApiError.js";
+import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
 
@@ -29,7 +29,7 @@ app.get("/.well-known/appspecific/com.chrome.devtools.json", (req: Request, res:
 app.use("/api/v1/auth", authRoutes);
 
 // Global Error Handling Middleware (Must be declared after routes)
-app.use(errorHandler);
+//app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
