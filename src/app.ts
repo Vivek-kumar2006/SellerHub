@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.routes.js";
+import userRoutes from './modules/user/user.routes.js'
 import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
@@ -26,8 +27,8 @@ app.get("/.well-known/appspecific/com.chrome.devtools.json", (req: Request, res:
 });
 
 // Mount Auth Module
-app.use("/api/v1/auth", authRoutes);
-
+app.use("/api/v1/", authRoutes);
+app.use("/api/v1/", userRoutes);
 // Global Error Handling Middleware (Must be declared after routes)
 //app.use(errorHandler);
 

@@ -12,8 +12,8 @@ import { verifyRoles } from "../../middlewares/rbac.middleware.js";
 const router = Router();
 
 // Registration & Authentication
-router.post("/register", validate({ body: RegisterUserSchema }), registerhandler);
-router.post("/login", validate({ body: LoginUserSchema }), loginhandler);
+router.post("/auth/register", validate({ body: RegisterUserSchema }), registerhandler);
+router.post("/auth/login", validate({ body: LoginUserSchema }), loginhandler);
 router.post("/register/customer", validate({ body: RegisterUserSchema }),verifyRoles('CUSTOMER'), registerhandler);
 
 // Token Lifecycle & Session Management

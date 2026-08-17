@@ -2,7 +2,7 @@ import {prisma} from '../../lib/prisma'
 import bcrypt from 'bcrypt';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from '../../utils/ApiError';
-
+import { email } from 'zod';
 
 
 export const getMe =async(req:Request,res:Response,next:NextFunction)=>
@@ -19,5 +19,19 @@ export const getMe =async(req:Request,res:Response,next:NextFunction)=>
             if(!user){
                 throw new ApiError(400, "No such user found")
             }
-    
+           return res.status(200).json(
+            {
+                user:{
+                    id:user.id,
+                    name:user.name,
+                    email:user.email,
+                    phone:user.phone
+                }
+            })
+        return res.status(200).json(
+            {
+                "message":"FHLJ:JGF"
+            })
     }
+
+
