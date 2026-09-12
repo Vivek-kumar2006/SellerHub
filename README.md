@@ -16,7 +16,6 @@ SellerHub is a self-contained authentication and user-management service. It goe
 - **Refresh token rotation** — tokens are persisted in PostgreSQL, not just trusted as stateless JWTs, so individual sessions can be revoked
 - **Role-based access control (RBAC)** — `USER` / `ADMIN` roles enforced via middleware, independent of authentication
 - **Runtime request validation** with Zod, generating TypeScript types from a single schema
-- **Redis-backed rate limiting** (sliding window) on the login endpoint to mitigate brute-force attempts
 - **Centralized error handling** — no raw stack traces ever reach the client
 - **Soft delete** — user records are deactivated, never destroyed, preserving referential integrity
 - **Swagger/OpenAPI documentation** for every endpoint
@@ -29,7 +28,6 @@ SellerHub is a self-contained authentication and user-management service. It goe
 | Framework | Express.js |
 | Database | PostgreSQL |
 | ORM | Prisma |
-| Cache / Rate Limiting | Redis |
 | Validation | Zod |
 | Auth | JSON Web Tokens (jsonwebtoken), bcrypt |
 | Docs | Swagger (OpenAPI 3.0) |
@@ -49,7 +47,7 @@ Express API Layer
 Service Layer      (business logic)
   │
   ▼
-PostgreSQL (via Prisma)   +   Redis (rate limiting)
+PostgreSQL (via Prisma)  
 ```
 
 Requests flow through a strict pipeline: **authenticate → authorize → validate → execute**, in that exact order. RBAC middleware always runs *after* JWT verification, since it depends on `req.user` being populated — reversing this order is a common bug this project deliberately guards against.
@@ -59,7 +57,7 @@ Requests flow through a strict pipeline: **authenticate → authorize → valida
 | Method | Endpoint | Access | Description |
 |---|---|---|---|
 | `POST` | `/api/v1/auth/register` | Public | Register a new user |
-| `POST` | `/api/v1/auth/login` | Public (rate-limited) | Login, returns access + refresh token |
+| `POST` | `/api/v1/auth/login` | Public  | Login, returns access + refresh token |
 | `POST` | `/api/v1/auth/refresh` | Public | Rotate refresh token, issue new access token |
 | `POST` | `/api/v1/auth/logout` | Authenticated | Revoke refresh token |
 | `GET` | `/api/v1/users/me` | Authenticated | Get own profile |
@@ -80,9 +78,6 @@ A purely stateless JWT can't be revoked before it expires. Storing the refresh t
 
 **RBAC is a separate middleware from authentication.**
 Authentication answers *"who are you?"* Authorization answers *"what are you allowed to do?"* Keeping them as two composable middlewares (`authenticate` → `requireRole('ADMIN')`) means new roles or permission rules can be added without touching the JWT verification logic at all.
-
-**Rate limiting checks `count === 1` before setting `EXPIRE`.**
-Calling `EXPIRE` on every request would keep sliding the rate-limit window forward indefinitely, defeating its purpose. Setting it only on the first request in a window guarantees a fixed, predictable reset period.
 
 **Soft delete instead of hard delete.**
 Destroying a `User` row outright risks orphaning related records and breaking foreign-key constraints. Flipping `isActive` to `false` preserves data integrity while still fully blocking that user from authenticating.
@@ -116,7 +111,6 @@ The API runs at `http://localhost:5000` by default. Swagger docs are available a
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/sellerhub
-REDIS_URL=redis://localhost:6379
 JWT_ACCESS_SECRET=your_access_secret
 JWT_REFRESH_SECRET=your_refresh_secret
 PORT=5000
@@ -148,12 +142,8 @@ src/
 
 A Postman collection covering every endpoint — including expected failure cases (duplicate email, wrong role, expired token, rate-limit exceeded) — is included at [`sellerhub.postman_collection.json`](./sellerhub.postman_collection.json).
 
-## Roadmap
 
-- [ ] OAuth2 (Google login)
-- [ ] Redis-based token blacklisting for immediate access-token revocation
-- [ ] Multi-factor authentication
 
 ---
 
-Built by [Your Name] · [LinkedIn](#) · [X/Twitter](#)
+Built by Vivek Kumar · [LinkedIn](#https://www.linkedin.com/notifications/) · [X/Twitter](#https://x.com/kumar80281)
