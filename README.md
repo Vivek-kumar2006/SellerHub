@@ -146,4 +146,4 @@ A Postman collection covering every endpoint — including expected failure case
 
 ---
 
-Built by **Vivek Kumar** · **[LinkedIn](#https://www.linkedin.com/notifications/)** · **[X/Twitter](#https://x.com/kumar80281)**
+Built by **Vivek Kumar** · **[LinkedIn](https://www.linkedin.com/notifications/)** · **[X/Twitter](https://x.com/kumar80281)**
